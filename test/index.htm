@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Jasmine Spec Runner</title>
+
+    <link rel="shortcut icon" type="image/png" href="/node_modules/jasmine-core/images/jasmine_favicon.png">
+    <link rel="stylesheet" href="/node_modules/jasmine-core/lib/jasmine-core/jasmine.css">
+    <style>
+        .parent {
+            display: none;
+        }
+    </style>
+
+    <script src="/node_modules/jasmine-core/lib/jasmine-core/jasmine.js"></script>
+    <script src="/node_modules/jasmine-core/lib/jasmine-core/jasmine-html.js"></script>
+    <script src="/node_modules/jasmine-core/lib/jasmine-core/boot.js"></script>
+</head>
+
+<body>
+
+    <div class="parent">
+
+        <img id="test-2" src="" />
+
+        <img id="test-3" src="" />
+
+        <img id="test-4" src="" />
+
+        <div id="test-5" class="parent">
+            <img src="" type="" class="child" />
+            <img src="" type="" class="child" />
+        </div>
+        
+        <button id="test-6" type="button">Trigger Event</button>
+        
+        <button id="test-7" type="button">Trigger Custom Event</button>
+
+        <img id="test-8" src="" />
+
+        <div id="test-9" class="parent">
+            <button type="button">Bubble</button>
+        </div>
+
+		<img id="test-10" src="" />
+
+    </div>
+
+	<!--[if IE 8]>
+    	<script src="/node_modules/addeventlistener-with-dispatch/dist/addeventlistener-with-dispatch.js"></script>
+	<![endif]-->
+    <script src="/src/lski-events.js"></script>
+    <script src="index.js"></script>
+
+</body>
+
+</html>
