@@ -29,7 +29,8 @@
 		remove: remove,
 		off: remove,
 		fire: fire,
-		trigger: fire
+		trigger: fire,
+		query: query
 	};
 
 	/**
