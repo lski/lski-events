@@ -23,15 +23,36 @@
 
 	var events = {
 		add: add,
-		on: add,
 		once: once,
-		one: once,
 		remove: remove,
-		off: remove,
 		fire: fire,
-		trigger: fire,
-		query: query
+		query: query,
+		ready: ready,
+		/* Alias functions */
+		on: add,
+		one: once,
+		off: remove,
+		trigger: fire
 	};
+	
+	/**
+	 * Runs the passed in handler if or when the document has loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading. So the DOM can be manipulated.
+	 * If not loaded it fires when it does, otherwise fires instantly
+	 * 
+	 * @param {function} handler The callback run when the DOM is ready to accessed.
+	 */
+	function ready(handler) {
+
+		if (/complete|loaded/.test(document.readyState)) {
+			// fire it now, but make the action async
+			setTimeout(function() {	
+				handler.call(window, new DOMContentLoadedEvent()); 
+			}, 1);
+		}
+		else {
+			document.addEventListener("DOMContentLoaded", handler);
+		}
+	}
 
 	/**
 	 * Attaches an event listener to the passed in element. It can be run either directly by attaching a listener to an element, very similar to addEventlistener or it can be given an extra selector where it can be placed in a parent element and used to listen to events fired from children matching that selector.
@@ -338,6 +359,35 @@
 		}
 		
 		return null;
+	}
+
+	/**
+	 * Simply noop operation, save creating loads of separate empty functions
+	 */
+	function noop() {
+	}
+	
+	/**
+	 * A class for simulating the Event fired when DOMContentLoaded is fired. 
+	 * Obviously not ideal, but as Event properties are read only it will have to surfix
+	 */
+	function DOMContentLoadedEvent() {
+
+		this.isTrusted = true;
+		this.bubbles = true;
+		this.cancelable = false;
+		this.cancelBubble = false;
+		this.currentTarget = null;
+		this.defaultPrevented = false;
+		this.timestamp = new Date().getTime();
+		this.returnValue = true;
+		this.type = "DOMContentLoaded";
+		this.target = this.srcElement = document;
+		this.path = [document, window];
+		
+		this.preventDefault = noop;
+		this.stopImmediatePropagation = noop;
+		this.stopPropagation = noop;
 	}
 	
 	// To be able to remove listeners that have wrapped the callbacks

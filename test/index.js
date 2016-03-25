@@ -225,7 +225,7 @@
 		
 		var s12 = it(++eventNo + ': should filter out events that are not correct', function(done) {
 
-			var el = document.getElementById('test-10'),
+			var el = document.getElementById('test-11'),
 				runCount = 0;
 
 			evts.add(el, [' click  ', ''], function(evt) {
@@ -241,6 +241,22 @@
 				expect(runCount).toBe(1);
 				done();
 			}, 2000);
+		});
+		
+		var s13 = it(++eventNo + ': should fire ready', function(done) {
+
+			var run = false;
+			
+			evts.ready(function(evt){
+				
+				run = true;
+				_log(s13.getFullName(), 'ready fired', evt, this);
+			});
+
+			setTimeout(function() {
+				expect(run).toBe(true);
+				done();
+			}, 500);
 		});
 	});
 
