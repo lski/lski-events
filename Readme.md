@@ -19,6 +19,7 @@ lski-events supports for globals (lski.events), CommonJS and AMD. It is also ava
 
 ```bat
 npm install lski-events
+or
 bower install lski-events
 ```
 
@@ -135,18 +136,30 @@ events.remove('#mybutton', 'click, dblclick', function(event) { });
 
 ### Trigger Events
 
-Triggering an event means fire any matching 
+Triggering an event means fire against any matching events that have been added to the element
 
 ```javascript
 // With a string name for the event
 events.trigger('button', 'click');
 
+// Passing data to the listener
+events.trigger('button', 'click', { myData: data });
+```
+
+*__NB:__* This example creates a cross browser 'CustomEvent' behind the scenes for you, so that you dont have to worry about the different ways of creating an Event object in browsers yourself.
+
+```javascript
 // Using a pre-created Event object 
 var evt = new CustomEvent('click', { 'bubbles': true, 'cancelable': true });
 events.trigger('button', evt);
+
+// Using a pre-created Event object with data to pass to the listener
+var evt = new CustomEvent('click', { 'bubbles': true, 'cancelable': true, detail: { myData: data } });
+events.trigger('button', evt);
 ```
 
-*__NB:__* This example of creating a new event object would be different on different enviroments but the trigger function would work the same regardless.
+*__NB:__*  This example of creating a new event object would be different on different enviroments but the trigger function would work the same regardless. 
+
 
 ## Build
 

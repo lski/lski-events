@@ -58,7 +58,7 @@
 			return _addDelegated.apply(this, arguments);
 		}
 	}
-	
+
 	function _addDirect(elements, events, handler) {
 
 		var eventNames = _mapAndFilterEvents(events);
@@ -151,10 +151,10 @@
 		return _forEachElements(elements, function(element) {
 
 			for (var i = 0; i < eventNames.length; i++) {
-				
+
 				var listener = _listeners.find(element, eventNames[i], handler);
-				
-				if(listener) {
+
+				if (listener) {
 					element.removeEventListener(eventNames[i], listener.wrapper, false);
 					_listeners.remove(listener);
 				}
@@ -164,23 +164,35 @@
 			}
 		});
 	}
-
+	
 	/**
 	 * Fire an event attached to an element
 	 * 
 	 * @param {string|Element|NodeList|Array} element Accepts different types, a single Element or 'array like' (e.g. NodeList) list of Elements that the listener will be added too. But also accepts a string, which is used as a selector to query the dom for Elements.
-	 * @param {string|Array} eventNames Either a space separated list of event names or an array of event names e.g. 'click' or 'click dblclick' or ['click','dblclick']
+	 * @param {string|Array|Event} events If a string it can be a single event name, or a space separated list of event names e.g. 'click' or 'click dblclick'. If a single Event object it is used directly (params are ignored). If an array can be an array of event names or Event objects.
+	 * @param {object} [params] Optional and only used if the events param is an string or list of string. An object with upto three properties { bubbles: true, cancelable: true, detail: undefined } omitting them is ok as the defaults will be used
 	 */
-	function fire(elements, eventNames) {
+	function fire(elements, events, params) {
 
-		var events = (typeof eventNames !== 'string') ? [eventNames] : _mapAndFilterEvents(eventNames, function(evtName) {
-			return _createEvent(evtName);
-		});
+		params = _resolveFireParams(params);
 
+		var eventObjs;
+
+		// its a single pre-created event
+		if (events.type && events.cancelBubble !== undefined) {
+			eventObjs = [events];
+		}
+		// Its an array or a string to be split
+		else {
+			eventObjs = _mapAndFilterEvents(events, function(evt) {
+				return (evt.type && evt.cancelBubble !== undefined) ? evt : _createEvent(evt, params);
+			});
+		}
+		
 		return _forEachElements(elements, function(element) {
 
-			for (var i = 0; i < events.length; i++) {
-				element.dispatchEvent(events[i]);
+			for (var i = 0; i < eventObjs.length; i++) {
+				element.dispatchEvent(eventObjs[i]);
 			}
 		});
 	}
@@ -198,30 +210,99 @@
 	}
 
 	/**
+	 * Even though the CustomEvent will resolve these the defaults wanted by this library should be ensured too.
+	 * 
+	 * @param {object} params An object with upto three properties { bubbles: true, cancelable: true, detail: undefined } omitting them is ok as the defaults will be used
+	 * @returns {object} the object with defaults filled where needed
+	 */
+	function _resolveFireParams(params) {
+
+		var def = { bubbles: true, cancelable: true, detail: undefined };
+
+		// If I add an extend function then automate this
+		if (params) {
+			def.bubbles = params.bubbles === undefined ? def.bubbles : !!params.bubbles;
+			def.cancelable = params.cancelable === undefined ? def.cancelable : !!params.cancelable;
+			def.detail = params.detail;
+		}
+
+		return def;
+	}
+
+	/**
 	 * Cross browser function for creating an event object to be dispatched
 	 */
-	function _createEvent(name, options) {
+	var _createEvent = (function() {
 
-		options = options || { bubbles: true, "cancelable": true };
+		var CustomEvent;
 
+		// If CustomEvent exists use that
 		if (typeof window.CustomEvent === "function") {
-			try {
-				return new CustomEvent(name, options);
+			CustomEvent = window.CustomEvent;
+		}
+		// If it doesnt lets create it
+		else {
+
+			/**
+			 * Ensure the params that are coming in match the default bahviour of CustomEvent (where missing properties retain the default)
+			 * 
+			 * @param {object} params An object with upto three properties { bubbles: true, cancelable: true, detail: undefined } omitting them is ok as the defaults will be used
+			 * @returns {object} the object with defaults filled where needed
+			 */
+			var _resolveEventParams = function(params) {
+
+				var def = { bubbles: false, cancelable: false, detail: undefined };
+
+				// If I add an extend function then automate this
+				if (params) {
+					def.bubbles = params.bubbles === undefined ? def.bubbles : !!params.bubbles;
+					def.cancelable = params.cancelable === undefined ? def.cancelable : !!params.cancelable;
+					def.detail = params.detail;
+				}
+
+				return def;
+			};
+
+			// IE9>=
+			if (document.createEvent) {
+
+				// A polyfill for the CustomEvent class.
+				CustomEvent = function CustomEvent(event, params) {
+
+					params = _resolveEventParams(params);
+
+					var evt = document.createEvent('CustomEvent');
+					evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+
+					return evt;
+				};
 			}
-			catch (e) {	/*Allow to fall through*/ }
+			// IE8<=
+			else {
+
+				// A polyfill for the CustomEvent class.
+				CustomEvent = function CustomEvent(event, params) {
+
+					params = _resolveEventParams(params);
+
+					var evt = document.createEventObject();
+					evt.type = event;
+					evt.detail = params.detail;
+
+					return evt;
+				};
+			}
+
+			// Now add the functionality to the event from the event prototype
+			CustomEvent.prototype = window.Event.prototype;
 		}
 
-		if (document.createEvent) {
+		// The createEvent function that calls the CustomEvent native/created and returns its events
+		return function(event, params) {
+			return new CustomEvent(event, params);
+		};
 
-			var evt = document.createEvent('Event');
-			evt.initEvent(name, true, true);
-			return evt;
-		}
-
-		var evt = document.createEventObject();
-		evt.eventName = evt.type = name;
-		return evt;
-	}
+	})();
 
 	/**
 	 * Loops through the events and passes the trimmed eventName to the callback each loop and after processing if there is a empty name its discarded.
@@ -275,7 +356,7 @@
 		var isFunc = (typeof cb === 'function');
 
 		if (isFunc) {
-			
+
 			for (var i = 0, n = elements.length; i < n; i++) {
 
 				cb(elements[i], i);
@@ -329,60 +410,60 @@
 		var match = _matches(targetElement, selector);
 
 		// if found then return this element, otherwise check the parent of this element, if there is one and if not return null.
-		if(match) {
+		if (match) {
 			return targetElement;
 		}
-		
-		if(targetElement.parentElement) {
+
+		if (targetElement.parentElement) {
 			return _bubbleCheck(rootElement, targetElement.parentElement, selector);
 		}
-		
+
 		return null;
 	}
-	
+
 	// To be able to remove listeners that have wrapped the callbacks
 	var _listeners = (function() {
-		
+
 		function Listeners() {
 			this._listeners = [];
 		}
 		Listeners.prototype.add = add;
 		Listeners.prototype.remove = remove;
 		Listeners.prototype.find = find;
-		
+
 		return new Listeners();
-		
+
 		function add(element, eventName, original, wrapper) {
-			return this._listeners.push({ element: element, eventName: eventName, wrapper: wrapper, original: original});
+			return this._listeners.push({ element: element, eventName: eventName, wrapper: wrapper, original: original });
 		}
-		
+
 		function remove(listener) {
-			
+
 			for (var i = 0, n = this._listeners.length; i < n; i++) {
 
-				if(listener === this._listeners[i]) {
-					this._listeners.splice(i,1);
+				if (listener === this._listeners[i]) {
+					this._listeners.splice(i, 1);
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
-		
+
 		function find(element, eventName, original) {
-			
+
 			for (var i = 0, n = this._listeners.length; i < n; i++) {
 
 				var l = this._listeners[i];
 
-				if(l.element === element && l.eventName === eventName && l.original === original) {
+				if (l.element === element && l.eventName === eventName && l.original === original) {
 					return l;
 				}
 			}
-			
+
 			return null;
 		}
-		
+
 	})();
 
 	// Just in case the trim method isnt implemented

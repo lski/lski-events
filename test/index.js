@@ -6,7 +6,7 @@
 	/**
 	 * States whether log outputs to the console or not
 	 */
-	var outputLog = false;
+	var outputLog = true;
 	var imageSrcToLoad = "assests/test.png";
 	var altSrcImgToLoad = "assests/test-2.png";
 
@@ -241,6 +241,26 @@
 				expect(runCount).toBe(1);
 				done();
 			}, 2000);
+		});
+		
+		var s13 = it(++eventNo + ': should passed data', function(done) {
+
+			var el = document.getElementById('test-13');
+			var loaded = false;
+
+			evts.add(el, 'click', function(evt) {
+
+				_log(s13.getFullName(), 'bubble caught', evt, this);
+				expect(evt.detail).toBe('blah');
+				loaded = true;
+			});
+
+			evts.fire(el, 'click', { detail: 'blah' });
+
+			setTimeout(function() {
+				expect(loaded).toBe(true);
+				done();
+			}, 1000);
 		});
 	});
 
