@@ -3,7 +3,8 @@ const gulp = require('gulp'),
 	uglify = require('gulp-uglify'),
 	insert = require('gulp-insert'),
 	settings = require('./package.json'),
-	versionHeader = ["/*! ", settings.description, " - ", settings.version, " */\n"].join("");
+	merge = require('merge-stream'),
+	versionHeader = ["/*! ", settings.name, " - ", settings.version, " */\n"].join("");
 
 gulp.task('clean', clean);
 gulp.task('minify', ['clean'], minifyJs);
@@ -14,9 +15,13 @@ function clean() {
 }
 
 function minifyJs() {
-
-    return gulp.src(['./src/*.js', './node_modules/addeventlistener-with-dispatch/dist/addeventlistener-with-dispatch.js'])
-        .pipe(uglify())
-        .pipe(insert.prepend(versionHeader))
-        .pipe(gulp.dest('./dist/'));
+	
+	var src = gulp.src(['./src/*.js'])
+		.pipe(uglify())
+		.pipe(insert.prepend(versionHeader));
+		
+	var extra = gulp.src(['./node_modules/addeventlistener-with-dispatch/dist/addeventlistener-with-dispatch.js']);
+	
+	return merge(src, extra)
+		.pipe(gulp.dest('./dist/'));
 }
