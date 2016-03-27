@@ -1,6 +1,6 @@
 {
 	"name": "lski-events",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "Micro cross-browser event api",
 	"main": "./dist/lski-events.js",
 	"scripts": {
