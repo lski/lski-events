@@ -251,11 +251,11 @@
 			evts.add(el, 'click', function(evt) {
 
 				_log(s13.getFullName(), 'bubble caught', evt, this);
-				expect(evt.detail).toBe('blah');
+				expect(evt.detail.myData).toBe('blah');
 				loaded = true;
 			});
 
-			evts.fire(el, 'click', { detail: 'blah' });
+			evts.fire(el, 'click', { myData: 'blah' });
 
 			setTimeout(function() {
 				expect(loaded).toBe(true);

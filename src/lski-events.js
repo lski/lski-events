@@ -174,7 +174,7 @@
 	 */
 	function fire(elements, events, params) {
 
-		params = _resolveFireParams(params);
+		params = { bubbles: true, cancelable: true, detail: params };
 
 		var eventObjs;
 
@@ -207,26 +207,6 @@
 	 */
 	function query(selector, scoped) {
 		return (scoped || document).querySelectorAll(selector);
-	}
-
-	/**
-	 * Even though the CustomEvent will resolve these the defaults wanted by this library should be ensured too.
-	 * 
-	 * @param {object} params An object with upto three properties { bubbles: true, cancelable: true, detail: undefined } omitting them is ok as the defaults will be used
-	 * @returns {object} the object with defaults filled where needed
-	 */
-	function _resolveFireParams(params) {
-
-		var def = { bubbles: true, cancelable: true, detail: undefined };
-
-		// If I add an extend function then automate this
-		if (params) {
-			def.bubbles = params.bubbles === undefined ? def.bubbles : !!params.bubbles;
-			def.cancelable = params.cancelable === undefined ? def.cancelable : !!params.cancelable;
-			def.detail = params.detail;
-		}
-
-		return def;
 	}
 
 	/**
