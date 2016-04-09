@@ -1,6 +1,6 @@
 # Lski-Events
 
-A micro events handler (only 2.3kb - 936bytes gzipped) that behaves like the jQuery event API, where you can add, remove, fire events.
+A micro events handler (only 3.55kb - 1.30kb gzipped) that behaves like the jQuery event API, where you can add, remove, fire events.
 
 Providing features such as:
 
@@ -11,6 +11,7 @@ Providing features such as:
 - The ability to trigger events
 - Custom events
 - Normalisation of behaviour between browsers
+- Alias method names that mimic those in jQuery
 - IE8 support (With the use an extra plugin supplied [see here](#IE8))
 
 ## Install
