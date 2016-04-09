@@ -1,6 +1,6 @@
 # Lski-Events
 
-A micro events handler (only 3.55kb - 1.30kb gzipped) that behaves like the jQuery event API, where you can add, remove, fire events.
+A micro events handler (only 3.55kb - 1.30kb gzipped) where you can add, remove, fire events against elements or the document. It behaves like the jQuery event API (but does not have a dependancy on jQuery).
 
 Providing features such as:
 
@@ -16,12 +16,12 @@ Providing features such as:
 
 ## Install
 
-lski-events supports for globals (lski.events), CommonJS and AMD. It is also available via bower or npm using one of the commands below, or can be added as a script using the files in the dist folder.
+lski-events has support for globals as `lski.events`, CommonJS and AMD. It is also available via bower or npm using one of the commands below, or can be added as a script using the files in the dist folder.
 
 ```bat
-npm install lski-events
+npm install lski-events --save
 or
-bower install lski-events
+bower install lski-events --save
 ```
 
 ## Usage
@@ -34,6 +34,8 @@ There a several functions provided, each has an alias to a jquery method that it
 - fire - Dispatches an event, so that any listeners will run their handlers (alias 'trigger')
 
 ## Examples
+
+*__NB__: Below I have used `events` if using the global version use `lski.events` or store it in a variable with a smaller name if desired.*
 
 ### Add Listeners
 
@@ -126,7 +128,7 @@ events.add('#mybutton', 'click', myHandler);
 // Later on you can remove the handler
 events.remove('#mybutton', 'click', myHandler);
 ```
-*__NB:__* Removing a handler that hasnt been added yet does NOT throw an error
+*__NB:__ Removing a handler that hasnt been added yet does NOT throw an error*
 
 Like 'add' you can provide a string selector, an Element object or an array like list of Element objects. Plus you can detach a handler from multiple events in a single call like 'add' too:
 
@@ -147,7 +149,7 @@ events.trigger('button', 'click');
 events.trigger('button', 'click', { myData: data });
 ```
 
-*__NB:__* This example creates a cross browser 'CustomEvent' behind the scenes for you, so that you dont have to worry about the different ways of creating an Event object in browsers yourself.
+*__NB:__ This example creates a cross browser 'CustomEvent' behind the scenes for you, so that you dont have to worry about the different ways of creating an Event object in browsers yourself.*
 
 ```javascript
 // Using a pre-created Event object 
@@ -159,7 +161,7 @@ var evt = new CustomEvent('click', { 'bubbles': true, 'cancelable': true, detail
 events.trigger('button', evt);
 ```
 
-*__NB:__*  This example of creating a new event object would be different on different enviroments but the trigger function would work the same regardless. 
+*__NB:__ This example of creating a new event object would be different on different enviroments but the trigger function would work the same regardless.*
 
 
 ## Build
